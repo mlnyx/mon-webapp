@@ -1,26 +1,53 @@
 @import "tailwindcss";
 
+/* 다크 에디토리얼 테마 (기존 대시보드 톤 유지) */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #13151a;
+  --panel: #1b1e27;
+  --panel2: #222632;
+  --line: #2c313d;
+  --text: #ECEAE3;
+  --muted: #8b919c;
+  --accent: #E9806E;   /* coral */
+  --accent2: #6FB7A8;  /* teal — 긍정/목표 */
+  --warn: #E5544B;     /* 적자/경고 */
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-panel2: var(--panel2);
+  --color-line: var(--line);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent2: var(--accent2);
+  --color-warn: var(--warn);
+  --font-sans: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+html { color-scheme: dark; }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(111,183,168,0.06), transparent),
+    radial-gradient(900px 500px at -10% 10%, rgba(233,128,110,0.05), transparent),
+    var(--bg);
+  color: var(--text);
+  font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
 }
+
+/* 카드/패널 공통 */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+
+/* 로드 시 staggered reveal (1회) */
+@keyframes reveal {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.reveal { opacity: 0; animation: reveal 0.5s ease forwards; }

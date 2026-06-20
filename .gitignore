@@ -39,3 +39,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# 재무 데이터 안전장치 — 절대 커밋 금지 (데이터는 Supabase에만)
+*stats.json
+*.csv
+/data/
+/seed-data/
+supabase/seed-local.json
+
+# 템플릿은 커밋 (실제 키 파일만 제외)
+!.env.example
