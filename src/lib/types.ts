@@ -127,7 +127,7 @@ export interface Stats {
   transport_sub: Record<string, number>;
   subcats: Record<string, Record<string, number>>;
   hierarchy: Record<string, Record<string, HierSub>>;
-  top_single: { date: string; name: string; amount: number; cat: string; memo: string }[];
+  top_single: { date: string; name: string; amount: number; cat: string; sub?: string; memo: string }[];
   cashflow: Cashflow;
   months: string[];
   income_types: string[];
@@ -157,3 +157,45 @@ export interface PlannerState {
 export const won = (n: number) =>
   (n < 0 ? '-' : '') + Math.abs(Math.round(n)).toLocaleString('ko-KR') + '원';
 export const comma = (n: number) => Math.round(n).toLocaleString('ko-KR');
+
+// 세부분류(sub) → 사람이 읽기 좋은 라벨
+const SUB_LABEL: Record<string, string> = {
+  외식: '음식점',
+  배달: '배달',
+  '화장품·뷰티': '화장품',
+  '의류·패션': '옷',
+  전자기기: '전자기기',
+  온라인쇼핑: '온라인쇼핑',
+  백화점: '백화점',
+  편의점: '편의점',
+  생활잡화: '생활용품',
+  '악기·취미': '취미·악기',
+  운동: '운동',
+  '디지털·구독': '구독',
+  '오락·레저': '오락',
+  대중교통: '대중교통',
+  킥보드: '킥보드',
+  주유: '주유',
+  택시: '택시',
+  주차: '주차',
+};
+// 카테고리 → 라벨 (sub가 '전체'/없을 때)
+const CAT_LABEL: Record<string, string> = {
+  미용: '미용실',
+  의료: '병원·약국',
+  '카페·간식': '카페',
+  월세: '월세',
+  '주거·통신': '통신·공과금',
+  '경조사·선물': '경조사',
+  '생활·쇼핑': '쇼핑',
+  '문화·여가': '여가',
+  식비: '음식',
+  교통: '교통',
+  기타: '기타',
+};
+
+// 가맹점이 아니라 "무엇에 썼는지" 라벨. cat/sub 우선.
+export function typeLabel(cat: string, sub?: string): string {
+  if (sub && sub !== '전체' && SUB_LABEL[sub]) return SUB_LABEL[sub];
+  return CAT_LABEL[cat] ?? cat;
+}

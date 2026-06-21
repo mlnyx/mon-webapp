@@ -1,53 +1,419 @@
 @import "tailwindcss";
+@import "pretendard/dist/web/variable/pretendardvariable.css";
 
-/* 다크 에디토리얼 테마 (기존 대시보드 톤 유지) */
-:root {
-  --bg: #13151a;
-  --panel: #1b1e27;
-  --panel2: #222632;
-  --line: #2c313d;
-  --text: #ECEAE3;
-  --muted: #8b919c;
-  --accent: #E9806E;   /* coral */
-  --accent2: #6FB7A8;  /* teal — 긍정/목표 */
-  --warn: #E5544B;     /* 적자/경고 */
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  /* ─── CNalytics 60-30-10 팔레트 (R4, 2026-06-08) ───
+   * R4 CEO 결정: 구 primary #383092(보라끼, hue 279.8)가 헤드라인에서 안 예뻐서,
+   * 우리 구 브랜드색 #2F4DB5 Clinical Indigo(파란 인디고, hue 267.2)로 전환.
+   * "보라끼 제거 + 파랑 강화"하되 브랜드 3색(인디고+페리윙클+민트) 조화는 유지.
+   *   primary 의 hue 279.8 → 267.2, 명도 0.383 → 0.462 (더 밝고 파란 인디고).
+   * R3 60-30-10 구조는 유지:
+   *   60% 무채색 캔버스 유지 + "배경 계열"만 극미세 인디고끼(이제 hue 267.2)를
+   *   부여해 차가운 파란 인디고-그레이로 통일.
+   *   - foreground/card/border 는 무채색 유지 (텍스트 #1d1d1f, 카드 순백, 보더 무채색).
+   *   - background/muted/input/sidebar 만 미세 파란 인디고끼 시프트.
+   * 30% 인디고 구조는 section-tint/section-deep 토큰(아래)이 담당,
+   * 10% 유사색 액센트는 primary(파란 인디고)/secondary(페리윙클)/accent(민트) 유지.
+   *
+   * Background   #fcfcfd  oklch(0.994 0.002 267.2) — 거의 순백 + 극미세 파란 인디고끼
+   * Foreground   #1d1d1f  oklch(0.21 0 0)          — 애플 텍스트 블랙 (무채색 유지)
+   * Card/Popover #ffffff  oklch(1 0 0)             — 순백 (무채색 유지)
+   * Muted        #f5f5f8  oklch(0.968 0.006 267.2) — 파란 인디고-그레이 섹션
+   * Muted-fg     #6e6e73  oklch(0.55 0 0)          — 애플 secondary text (무채색 유지)
+   * Border       #d2d2d7  oklch(0.87 0 0)          — 애플 구분선 (무채색 유지)
+   * Input        #f6f6f9  oklch(0.97 0.005 267.2)  — 파란 인디고끼 입력 배경
+   * Primary      #2F4DB5  oklch(0.462 0.169 267.2) — Clinical Indigo (파란 인디고, brand-600, CTA/링크/포인트 전용)
+   * Secondary    #6F7CC8  oklch(0.609 0.116 275.1) — 페리윙클 (유지, 유사색)
+   * Accent       #86C7BC  oklch(0.783 0.068 182.7) — 민트 틸 (유지, 텍스트 금지)
+   */
+  --color-background: oklch(0.994 0.002 267.2);
+  --color-foreground: oklch(0.21 0 0);
+  --color-card: oklch(1.000 0.000 0);
+  --color-card-foreground: oklch(0.21 0 0);
+  --color-popover: oklch(1.000 0.000 0);
+  --color-popover-foreground: oklch(0.21 0 0);
+  --color-primary: oklch(0.462 0.169 267.2);
+  --color-primary-foreground: oklch(0.985 0 0);
+  --color-secondary: oklch(0.609 0.116 275.1);
+  --color-secondary-foreground: oklch(0.21 0 0);
+  --color-muted: oklch(0.968 0.006 267.2);
+  --color-muted-foreground: oklch(0.55 0 0);
+  --color-accent: oklch(0.783 0.068 182.7);
+  --color-accent-foreground: oklch(0.21 0 0);
+  --color-destructive: oklch(0.55 0.2 25);
+  --color-border: oklch(0.87 0 0);
+  --color-input: oklch(0.97 0.005 267.2);
+  --color-ring: oklch(0.462 0.169 267.2);
+  --color-chart-1: oklch(0.462 0.169 267.2);
+  --color-chart-2: oklch(0.609 0.116 275.1);
+  --color-chart-3: oklch(0.783 0.068 182.7);
+  --color-chart-4: oklch(0.65 0.15 75);
+  --color-chart-5: oklch(0.6 0.2 25);
+  /* sidebar/sidebar-accent 도 배경 계열이므로 background/muted 와 동일 미세 파란 인디고끼 */
+  --color-sidebar: oklch(0.985 0.003 267.2);
+  --color-sidebar-foreground: oklch(0.21 0 0);
+  --color-sidebar-primary: oklch(0.462 0.169 267.2);
+  --color-sidebar-primary-foreground: oklch(0.985 0 0);
+  --color-sidebar-accent: oklch(0.968 0.006 267.2);
+  --color-sidebar-accent-foreground: oklch(0.21 0 0);
+  --color-sidebar-border: oklch(0.87 0 0);
+  --color-sidebar-ring: oklch(0.462 0.169 267.2);
+
+  /* ─── 브랜드 커스텀 토큰 (Tailwind에서 직접 참조) ───
+   * R4(2026-06-08): clinical-primary 도 파란 인디고 #2F4DB5(hue 267.2)로 전환.
+   * 무채색 전환: text/border/bg 는 채도 0 무채색 유지, primary/secondary/accent
+   * 브랜드 색은 포인트 전용. *-subtle 배경은 채도를 절반으로 낮춰 과한 틴트 방지.
+   * primary-light/secondary 는 페리윙클(hue 275.1) 유지 — 유사색 조화.
+   */
+  --color-clinical-primary: oklch(0.462 0.169 267.2);
+  --color-clinical-primary-light: oklch(0.609 0.116 275.1);
+  --color-clinical-secondary: oklch(0.609 0.116 275.1);
+  --color-clinical-accent: oklch(0.783 0.068 182.7);
+  --color-clinical-text: oklch(0.21 0 0);          /* #1d1d1f 애플 텍스트 */
+  --color-clinical-text-muted: oklch(0.55 0 0);    /* #6e6e73 애플 secondary */
+  --color-clinical-text-placeholder: oklch(0.68 0 0);
+  --color-clinical-border: oklch(0.87 0 0);        /* #d2d2d7 애플 구분선 */
+  --color-clinical-bg: oklch(0.989 0 0);           /* #fcfcfc 무채색 */
+  --color-clinical-primary-subtle: oklch(0.962 0.012 267.2);  /* 채도 절반, 파란 인디고끼 */
+  --color-clinical-secondary-subtle: oklch(0.962 0.010 275.1);
+  --color-clinical-accent-subtle: oklch(0.962 0.009 182.7);
+  /* ─── Apple HIG Radius Scale ───
+   * 4 / 8 / 10 / 12 / 16 / 20 / 28 — Apple HIG에서 자주 보이는 라운딩
+   * --radius 는 shadcn/ui 의 기본 카드/입력 라운딩 (xl)
+   */
+  --radius: 0.75rem;            /* 12px — 카드/인풋 기본 */
+  --radius-xs: 0.25rem;         /* 4px  — 배지/태그 */
+  --radius-sm: 0.5rem;          /* 8px  — 작은 컨트롤 */
+  --radius-md: 0.625rem;        /* 10px — 버튼 */
+  --radius-lg: 1rem;            /* 16px — 패널 */
+  --radius-xl: 1.25rem;         /* 20px — 모달 */
+  --radius-2xl: 1.75rem;        /* 28px — 히어로 카드 */
+  --radius-pill: 9999px;        /* pill — CTA 버튼 */
+
+  /* ─── Apple HIG Spacing Scale ───
+   * Apple HIG는 4pt 그리드. 데스크톱에서는 8pt 단위로 배수.
+   * 여기서는 Tailwind 4pt 단위(1=4px)와 호환되도록 정의.
+   */
+  --space-section-y: 6rem;          /* 96px — 데스크톱 섹션 상하 패딩 (py-24) */
+  --space-section-y-lg: 8rem;       /* 128px — lg 이상 (py-32) */
+  --space-section-y-mobile: 3rem;   /* 48px — 모바일 (py-12) */
+  --space-content-x: 1.5rem;        /* 24px — 컨테이너 좌우 패딩 (px-6) */
+  --container-max: 80rem;           /* 1280px — Apple.com 의 최대 컨텐트 폭에 근접 */
+
+  /* ─── Apple HIG Elevation (Materials 영감) ───
+   * Apple은 그림자보다 material/blur 의존도가 높음.
+   * 카드/모달에는 아주 약한 ambient + 좁은 드롭 섀도 조합.
+   */
+  --elevation-1: 0 1px 2px 0 rgba(0, 0, 0, 0.04), 0 1px 0 0 rgba(0, 0, 0, 0.02);
+  --elevation-2: 0 4px 12px -2px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+  --elevation-3: 0 16px 32px -8px rgba(0, 0, 0, 0.08), 0 4px 12px -4px rgba(0, 0, 0, 0.06);
+  --elevation-4: 0 32px 64px -16px rgba(0, 0, 0, 0.12), 0 12px 24px -12px rgba(0, 0, 0, 0.08);
+
+  /* ─── Apple HIG Motion ───
+   * iOS 표준 easing — 자연스러운 감속 곡선
+   */
+  --ease-standard: cubic-bezier(0.42, 0, 0.58, 1);     /* ease-in-out 표준 */
+  --ease-emphasized: cubic-bezier(0.32, 0.72, 0, 1);   /* iOS 17+ spring 근사 */
+  --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);       /* enter */
+  --ease-accelerate: cubic-bezier(0.4, 0, 1, 1);       /* exit */
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 400ms;
+
+  /* 폰트 스택 — Apple 기기: SF Pro 매칭, 비-Apple(Windows/Android): Geist Sans 매칭 */
+  --font-sans: "SF Pro Display", "SF Pro Text", -apple-system,
+    BlinkMacSystemFont, "Apple SD Gothic Neo", var(--font-geist-sans),
+    "Pretendard Variable", "Pretendard", system-ui, "Segoe UI", sans-serif;
+
+  /* ─── 타이포 위계 토큰 — 시스템 스택 통일 (apple.com R2, 2026-06-08) ───
+   * CEO 요청: 헤드라인도 애플 SD산돌고딕(Apple SD Gothic Neo)처럼 시스템 폰트로.
+   * Montserrat/Paperlogy/Groonex 등 브랜드 전용 헤드라인 폰트를 전부 제거하고
+   * font-headline / font-subhead / font-button 모두 --font-sans 체인으로 통일.
+   *
+   * --font-sans = "SF Pro Display" → "Apple SD Gothic Neo" → Geist → "Pretendard"
+   *   → 애플 기기는 SF Pro / Apple SD Gothic Neo, 그 외는 Pretendard 로 렌더.
+   *   정확히 CEO 가 원한 "애플 사이트 폰트 느낌".
+   *
+   * 헤드라인의 타이트한 자간(애플 -0.02~-0.03em)은 헤드라인 텍스트 클래스
+   *   (.text-display / .text-fluid-hero / .apple-* 등)의 letter-spacing 으로 처리.
+   *   추가 헤드라인은 frontend-dev 가 tracking-tight 로 보강. */
+  --font-headline: var(--font-sans);
+  --font-subhead: var(--font-sans);
+  --font-button: var(--font-sans);
+
+  /* ─── 반응형 브레이크포인트 ───
+   * Tailwind v4 에서는 @theme 안에 --breakpoint-* 로 커스텀 브레이크포인트를 정의한다.
+   * - xs: 360px — iPhone SE2/3, 갤럭시 중저가 (2열이 여유롭게 들어가는 최소폭)
+   * - 3xl: 1920px — FHD 대형 데스크톱
+   * - 4xl: 2560px — QHD/울트라와이드
+   * 기본 sm(640), md(768), lg(1024), xl(1280), 2xl(1536)는 유지된다.
+   */
+  --breakpoint-xs: 360px;
+  --breakpoint-3xl: 1920px;
+  --breakpoint-4xl: 2560px;
+
+  /* ─── Apple HIG 4단계 텍스트 계층 — 무채색 전환 2026-06-08 ─── */
+  --color-label:            oklch(0.21 0 0);   /* #1d1d1f */
+  --color-label-secondary:  oklch(0.55 0 0);   /* #6e6e73 */
+  --color-label-tertiary:   oklch(0.62 0 0);
+  --color-label-quaternary: oklch(0.70 0 0);
+
+  /* ─── Apple HIG System Colors ─── */
+  --color-system-blue:   oklch(0.55 0.24 260);
+  --color-system-green:  oklch(0.60 0.20 145);
+  --color-system-red:    oklch(0.55 0.22 25);
+  --color-system-orange: oklch(0.65 0.20 55);
+  --color-system-teal:   oklch(0.60 0.14 195);
+  --color-system-purple: oklch(0.55 0.18 300);
+  --color-system-pink:   oklch(0.60 0.20 350);
+  --color-system-yellow: oklch(0.75 0.15 85);
+
+  /* ─── 브랜드 전체 스케일 50~950 (R4 브랜드 가이드라인 2026-06) ───
+   * R4: hue=267.2 고정 (구 279.8 보라끼 → 파란 인디고), primary #2F4DB5 = brand-600 기준.
+   *   #2F4DB5 자체 = oklch(0.462 0.169 267.2). 명도 곡선을 새 primary 에 맞춰 재생성.
+   * bg-brand-100, text-brand-600 처럼 Tailwind 유틸리티로 직접 사용 가능.
+   */
+  --color-brand-50:  oklch(0.970 0.014 267.2);
+  --color-brand-100: oklch(0.940 0.032 267.2);
+  --color-brand-200: oklch(0.885 0.065 267.2);
+  --color-brand-300: oklch(0.790 0.110 267.2);
+  --color-brand-400: oklch(0.580 0.150 267.2);
+  --color-brand-500: oklch(0.510 0.165 267.2);
+  --color-brand-600: oklch(0.462 0.169 267.2);
+  --color-brand-700: oklch(0.430 0.165 267.2);
+  --color-brand-800: oklch(0.380 0.150 267.2);
+  --color-brand-900: oklch(0.300 0.110 267.2);
+  --color-brand-950: oklch(0.210 0.070 267.2);
+
+  /* ─── 60-30-10 섹션 틴트 토큰 (R3, 2026-06-08) — "30% 인디고 구조" 전용 ───
+   * frontend-dev 가 .bg-section-tint / .bg-section-deep 유틸리티로 사용한다.
+   *   - section-tint (brand-50): 제품 섹션을 교차로 옅은 인디고끼로 칠해
+   *     무채색 배경과 리듬을 만든다 (예: 짝수 섹션, FAQ 밴드).
+   *   - section-deep (brand-800): 푸터·CTA 밴드처럼 또렷한 인디고 다크 면.
+   *     foreground 는 흰색 계열을 얹는다 (대비 확보).
+   * 다크 모드 대응값은 .dark 블록에서 오버라이드.
+   */
+  --color-section-tint: oklch(0.972 0.014 267.2);   /* 옅은 파란 인디고 — 제품 섹션 교차 */
+  --color-section-deep: oklch(0.34 0.15 267.2);     /* 또렷한 파란 인디고 다크 — 푸터/CTA 밴드 */
+
+  /* ─── Apple systemGray 1~6 (design-system.md §3.3) ───
+   * 라이트 모드 기준. 다크 모드는 .dark 블록에서 오버라이드.
+   */
+  --color-gray-systemGray: oklch(0.650 0.005 0);
+  --color-gray-1: oklch(0.725 0.004 0);
+  --color-gray-2: oklch(0.810 0.003 0);
+  --color-gray-3: oklch(0.840 0.003 0);
+  --color-gray-4: oklch(0.910 0.003 0);
+  --color-gray-5: oklch(0.955 0.003 0);
+
+  /* ─── 무채색 중립 팔레트 (apple.com R2, 2026-06-08) ───
+   * 중립 neutrals 를 베이스로 두고 브랜드 컬러는 CTA/포인트에만 쓴다.
+   * apple.com 레퍼런스: 텍스트 #1d1d1f, secondary #6e6e73, 보더 #d2d2d7,
+   * 섹션 회색 #f5f5f7. HEX 직접 (인쇄물·마케팅 자산과 일치).
+   * 무채색 전환: 구 Precision Blue warm white(#FCF7F5)·#202538 보라끼 제거.
+   *
+   * 사용 가이드:
+   *   - text-neutral-ink        = #1D1D1F (본문 텍스트, 애플 블랙)
+   *   - text-neutral-1          = #6E6E73 (보조 텍스트, 애플 secondary)
+   *   - bg-neutral-2            = #A1A1A6 (디바이더·비활성 아이콘)
+   *   - border-neutral-3        = #D2D2D7 (카드 보더·구분선)
+   *   - bg-neutral-surface      = #F5F5F7 (애플 섹션 회색)
+   */
+  --color-neutral-ink:     #1D1D1F;
+  --color-neutral-1:       #6E6E73;
+  --color-neutral-2:       #A1A1A6;
+  --color-neutral-3:       #D2D2D7;
+  --color-neutral-surface: #F5F5F7;
+
+  /* ─── Material backdrop-blur 토큰 (CEO 확정 5겹 Liquid Glass 기준) ───
+   * Tailwind `backdrop-blur-thin`, `backdrop-blur-regular` 유틸리티로 사용.
+   */
+  --blur-ultra-thin: 30px;
+  --blur-thin: 24px;
+  --blur-regular: 20px;
+  --blur-thick: 16px;
+
+  /* ─── 8pt 그리드 추가 토큰 (design-system.md §5) ─── */
+  --spacing-section-y-desktop: 6rem;  /* 96px */
+  --spacing-section-y-tablet: 4rem;   /* 64px */
+  --spacing-section-y-mobile: 3rem;   /* 48px */
+
+  /* ─── Liquid Glass Role-based Tokens (Shrimp #29, Phase 1) ───
+   * 리서치 보고서 docs/design/liquid-glass-research-2026-04-22.md §C 참조.
+   *
+   * 역할(surface / overlay / nav / sidebar) 기반 토큰. 컴포넌트 이름 금지.
+   * 기존 `.glass`, `.glass-card`, `.glass-liquid`, `.material-*` 은 유지 —
+   * 신규 variant (Card `variant="glass*"`) 만 이 토큰을 참조한다.
+   *
+   * 브랜드 tint 는 OKLCH relative color 로 팔레트 종속 — Clinical Indigo
+   * primary/accent 가 바뀌면 glass tint 가 자동 추종된다.
+   */
+  --glass-surface-alpha:    0.45;
+  --glass-overlay-alpha:    0.70;
+  --glass-nav-alpha:        0.60;
+  --glass-sidebar-alpha:    0.50;
+
+  --glass-blur-surface:     24px;
+  --glass-blur-overlay:     32px;
+  --glass-blur-nav:         20px;
+
+  --glass-saturate:         180%;
+  --glass-saturate-strong:  200%;
+
+  --glass-rim-light:        rgb(255 255 255 / 0.55);
+  --glass-rim-inner:        rgb(255 255 255 / 0.70);
+
+  /* Specular highlight 위치 — useGlassHighlight 훅이 런타임에 오버라이드 */
+  --glass-specular-x:         14%;
+  --glass-specular-y:         10%;
+  --glass-specular-intensity: 0.18;
+
+  /* 팔레트 자동 추종 — Clinical Indigo 가 바뀌면 glass tint 도 따라감 */
+  /* Precision Blue 재조정(2026-04-22): 브랜드 tint alpha 를 더 낮춰
+   * 글래스 표면을 중립적으로 유지. 포인트 컬러는 CTA/아이콘에만 집중. */
+  --glass-tint-primary:  oklch(from var(--color-primary) l c h / 0.025);
+  --glass-tint-accent:   oklch(from var(--color-accent)  l c h / 0.02);
+
+  /* ─── 브랜드 그라디언트 토큰 3종 (브랜드 가이드라인 2026-06) ───
+   * 60/30/10 white-dominant 규칙: 배경은 흰색 중심, 그라디언트는
+   * 히어로·CTA·다크 밴드 등 포인트 영역에만 사용.
+   */
+  --gradient-brand-primary:   linear-gradient(135deg, oklch(0.462 0.169 267.2), oklch(0.300 0.110 267.2)); /* 파란 인디고 — 다크 모드/다크 밴드용 (brand-600→900) */
+  --gradient-brand-secondary: linear-gradient(135deg, oklch(0.994 0 0), oklch(0.609 0.116 275.1));  /* 라이트 히어로용 무채색 순백→periwinkle (시작색 무채색화) */
+  --gradient-brand-tertiary:  linear-gradient(135deg, oklch(0.609 0.116 275.1), oklch(0.783 0.068 182.7)); /* periwinkle→mint 포인트 */
+
+  /* ─── CNalytics 의료 도메인 컬러 (DESIGN.md v1.0, 2026-05-05) ───
+   * 분석 상태 / 임상 위험 등급 시각화. light/dark 공통 (채도 낮춤).
+   * WCAG AA: 텍스트-배경 대비 ≥ 4.5:1.
+   * 사용 예: bg-analysis-success, text-analysis-warning, ring-analysis-critical
+   *
+   * 주의: analysis-warning 은 색맹 사용자 구분 어려움 → 항상 아이콘/텍스트 병행.
+   */
+  --color-analysis-success:  oklch(0.60 0.20 145);   /* #2BA868 — Apple systemGreen 채도↓ */
+  --color-analysis-warning:  oklch(0.65 0.20 55);    /* #D98920 — 앰버 */
+  --color-analysis-critical: oklch(0.55 0.22 25);    /* #D6453B — 적색 */
+  --color-analysis-pending:  oklch(0.55 0.24 260);   /* #3B82F6 — Apple systemBlue */
+
+  /* subtle 배경 (각 상태의 50 단계 — 카드/배지 배경용) */
+  --color-analysis-success-subtle:  oklch(0.955 0.030 145);
+  --color-analysis-warning-subtle:  oklch(0.965 0.025 55);
+  --color-analysis-critical-subtle: oklch(0.955 0.025 25);
+  --color-analysis-pending-subtle:  oklch(0.955 0.030 260);
 }
 
-@theme inline {
-  --color-bg: var(--bg);
-  --color-panel: var(--panel);
-  --color-panel2: var(--panel2);
-  --color-line: var(--line);
-  --color-text: var(--text);
-  --color-muted: var(--muted);
-  --color-accent: var(--accent);
-  --color-accent2: var(--accent2);
-  --color-warn: var(--warn);
-  --font-sans: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+.dark {
+  /* apple.com 다크 = 순흑 #000 계열 + 밝은 무채색 텍스트.
+   * R3 (2026-06-08): 배경(background)은 순흑 무채색 유지하고,
+   * 라이트와 대칭으로 muted/card 표면에만 극미세 파란 인디고끼(chroma 0.004)를 허용.
+   * 거의 인지되지 않는 수준이라 무채색 무드는 그대로, 따뜻한 그레이 회피 효과만.
+   * R4: 미세 인디고끼 hue 279.8 → 267.2 (파란 인디고로 통일). */
+  --color-background: oklch(0.131 0 0);
+  --color-foreground: oklch(0.963 0 0);
+  --color-card: oklch(0.205 0.004 267.2);
+  --color-card-foreground: oklch(0.963 0 0);
+  --color-popover: oklch(0.205 0.004 267.2);
+  --color-popover-foreground: oklch(0.963 0 0);
+  /* CTA 가시성 위해 밝은 톤 유지하되 채도 절제 (chroma 0.085), hue 267.2 파란 인디고 */
+  --color-primary: oklch(0.680 0.085 267.2);
+  --color-primary-foreground: oklch(0.131 0 0);
+  --color-secondary: oklch(0.462 0.169 267.2);
+  --color-secondary-foreground: oklch(0.963 0 0);
+  --color-muted: oklch(0.180 0.004 267.2);
+  --color-muted-foreground: oklch(0.660 0 0);
+  --color-accent: oklch(0.783 0.068 182.7);
+  --color-accent-foreground: oklch(0.131 0 0);
+  --color-destructive: oklch(0.55 0.2 25);
+  --color-border: oklch(1 0 0 / 0.08);
+  --color-input: oklch(1 0 0 / 0.06);
+  --color-ring: oklch(0.680 0.085 267.2);
+  --color-sidebar: oklch(0.160 0 0);
+  --color-sidebar-foreground: oklch(0.963 0 0);
+  --color-sidebar-primary: oklch(0.680 0.085 267.2);
+  --color-sidebar-primary-foreground: oklch(0.131 0 0);
+  --color-sidebar-accent: oklch(0.205 0 0);
+  --color-sidebar-accent-foreground: oklch(0.963 0 0);
+  --color-sidebar-border: oklch(1 0 0 / 0.08);
+  --color-sidebar-ring: oklch(0.680 0.085 267.2);
+
+  /* ─── Apple HIG 4단계 텍스트 계층 (다크, 완전 무채색 chroma 0) ─── */
+  --color-label:            oklch(0.963 0 0);
+  --color-label-secondary:  oklch(0.720 0 0);
+  --color-label-tertiary:   oklch(0.560 0 0);
+  --color-label-quaternary: oklch(0.420 0 0);
+
+  /* ─── 브랜드 커스텀 토큰 (다크, 무채색 BG + 브랜드 포인트, R4 hue 267.2) ─── */
+  --color-clinical-primary: oklch(0.680 0.085 267.2);
+  --color-clinical-primary-light: oklch(0.760 0.070 267.2);
+  --color-clinical-secondary: oklch(0.680 0.085 267.2);
+  --color-clinical-accent: oklch(0.783 0.068 182.7);
+  --color-clinical-text: oklch(0.963 0 0);
+  --color-clinical-text-muted: oklch(0.660 0 0);
+  --color-clinical-text-placeholder: oklch(0.510 0 0);
+  --color-clinical-border: oklch(1 0 0 / 0.08);
+  --color-clinical-bg: oklch(0.131 0 0);
+  --color-clinical-primary-subtle: oklch(0.220 0.020 267.2);
+  --color-clinical-secondary-subtle: oklch(0.220 0.015 267.2);
+  --color-clinical-accent-subtle: oklch(0.220 0.012 182.7);
+
+  /* ─── systemGray 다크 매핑 (design-system.md §3.3) ─── */
+  --color-gray-1: oklch(0.485 0.004 0);
+  --color-gray-2: oklch(0.365 0.003 0);
+  --color-gray-3: oklch(0.305 0.003 0);
+  --color-gray-4: oklch(0.245 0.003 0);
+  --color-gray-5: oklch(0.175 0.003 0);
+
+  /* ─── 다크 모드 brand 스케일 (명도 반전, R4 hue 267.2, 무채색 지향 절제) ───
+   * 상위 단계(700~950)는 CTA/primary 가 참조하므로 파랑 chroma 를 절제 정렬. */
+  --color-brand-50:  oklch(0.160 0.050 267.2);
+  --color-brand-100: oklch(0.250 0.060 267.2);
+  --color-brand-200: oklch(0.320 0.080 267.2);
+  --color-brand-300: oklch(0.400 0.110 267.2);
+  --color-brand-400: oklch(0.490 0.140 267.2);
+  --color-brand-500: oklch(0.560 0.130 267.2);
+  --color-brand-600: oklch(0.620 0.105 267.2);
+  --color-brand-700: oklch(0.680 0.085 267.2);
+  --color-brand-800: oklch(0.760 0.070 267.2);
+  --color-brand-900: oklch(0.880 0.040 267.2);
+  --color-brand-950: oklch(0.950 0.020 267.2);
+
+  /* ─── 60-30-10 섹션 틴트 — 다크 모드 오버라이드 (R3, 2026-06-08) ───
+   * 라이트는 옅은/또렷한 인디고였지만, 다크는 흑색 캔버스 기준으로 반전한다.
+   *   - section-tint : 살짝 들린 다크 인디고 표면 (라이트의 brand-50 대응).
+   *   - section-deep : 다크 밴드 위에서는 더 또렷한 밝은 인디고 면으로 구분.
+   * frontend 가 dark: 클래스를 따로 쓰지 않아도 .bg-section-* 가 자동 추종. */
+  --color-section-tint: oklch(0.210 0.030 267.2);   /* 다크 옅은 파란 인디고 표면 */
+  --color-section-deep: oklch(0.360 0.130 267.2);   /* 다크 밴드용 또렷한 파란 인디고 */
+
+  /* ─── Liquid Glass Role-based Tokens — 다크 모드 ─── */
+  --glass-surface-alpha:    0.40;
+  --glass-overlay-alpha:    0.55;
+  --glass-nav-alpha:        0.45;
+  --glass-sidebar-alpha:    0.40;
+  --glass-rim-light:        rgb(255 255 255 / 0.10);
+  --glass-rim-inner:        rgb(255 255 255 / 0.08);
+  --glass-specular-intensity: 0.06;
+
+  /* ─── CNalytics 의료 도메인 컬러 — 다크 모드 ───
+   * hue 동일 유지, lightness 약간 ↑ 로 배경 대비 확보.
+   * subtle 배경은 어두운 톤으로 반전 (text 가 아닌 배경용).
+   */
+  --color-analysis-success:  oklch(0.65 0.20 145);
+  --color-analysis-warning:  oklch(0.70 0.20 55);
+  --color-analysis-critical: oklch(0.62 0.22 25);
+  --color-analysis-pending:  oklch(0.62 0.24 260);
+
+  --color-analysis-success-subtle:  oklch(0.230 0.060 145);
+  --color-analysis-warning-subtle:  oklch(0.230 0.055 55);
+  --color-analysis-critical-subtle: oklch(0.230 0.060 25);
+  --color-analysis-pending-subtle:  oklch(0.230 0.070 260);
 }
 
-html { color-scheme: dark; }
-
+/* ─── 가계부 앱 공통 ─── */
 body {
-  background:
-    radial-gradient(1200px 600px at 80% -10%, rgba(111,183,168,0.06), transparent),
-    radial-gradient(900px 500px at -10% 10%, rgba(233,128,110,0.05), transparent),
-    var(--bg);
-  color: var(--text);
-  font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+  font-family: 'Pretendard Variable', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
   font-variant-numeric: tabular-nums;
 }
-
-/* 카드/패널 공통 */
-.panel {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-}
-
-/* 로드 시 staggered reveal (1회) */
-@keyframes reveal {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.reveal { opacity: 0; animation: reveal 0.5s ease forwards; }
+@keyframes reveal { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:translateY(0) } }
+.reveal { opacity:0; animation: reveal .45s ease forwards; }

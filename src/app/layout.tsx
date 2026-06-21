@@ -6,12 +6,18 @@ export const metadata: Metadata = {
   description: "개인 가계부 · 소비 통계 · 예산 플래너",
 };
 
+// 초기 테마 적용(깜빡임 방지) — 저장값 없으면 다크 기본
+const themeScript = `(function(){try{var t=localStorage.getItem('theme');var d=t?t==='dark':true;document.documentElement.classList.toggle('dark',d);document.documentElement.style.colorScheme=d?'dark':'light';}catch(e){document.documentElement.classList.add('dark');}})();`;
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ko" className="h-full antialiased">
-      <body className="min-h-full">{children}</body>
+    <html lang="ko" className="h-full antialiased" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
+      <body className="min-h-full bg-background text-foreground">{children}</body>
     </html>
   );
 }
