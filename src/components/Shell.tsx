@@ -10,6 +10,7 @@ import {
   Activity,
   Calculator,
   SlidersHorizontal,
+  Sparkles,
 } from 'lucide-react';
 import type { Stats, PlannerState } from '@/lib/types';
 import { Icon } from '@/components/ui/icon';
@@ -18,11 +19,13 @@ import { createClient } from '@/lib/supabase/client';
 import Report from '@/components/Report';
 import Planner from '@/components/Planner';
 import Review from '@/components/Review';
+import Coach from '@/components/Coach';
 import ThemeToggle from '@/components/ThemeToggle';
 
-// 섹션 키 — Report 내부 분기 + planner + review
+// 섹션 키 — Report 내부 분기 + planner + review + coach
 export type SectionKey =
   | 'summary'
+  | 'coach'
   | 'spend'
   | 'asset'
   | 'habit'
@@ -32,6 +35,7 @@ type ReportSection = 'summary' | 'spend' | 'asset' | 'habit';
 
 const NAV: { key: SectionKey; label: string; icon: LucideIcon }[] = [
   { key: 'summary', label: '요약', icon: LayoutDashboard },
+  { key: 'coach', label: '코치', icon: Sparkles },
   { key: 'spend', label: '소비', icon: ShoppingBag },
   { key: 'asset', label: '자산', icon: Wallet },
   { key: 'habit', label: '습관', icon: Activity },
@@ -104,6 +108,8 @@ export default function Shell({
           <Planner stats={stats} initial={planner} />
         ) : section === 'review' ? (
           <Review stats={stats} />
+        ) : section === 'coach' ? (
+          <Coach />
         ) : (
           <Report stats={stats} section={section as ReportSection} />
         )}
