@@ -21,6 +21,11 @@ interface Coaching {
   date: string;
   weekday: string;
   daily_limit: number;
+  month_spent: number;
+  month_budget: number;
+  remaining: number;
+  over_budget: boolean;
+  days_left: number;
   total_asset: number;
   schedule: Sched[];
   today_action: string;
@@ -93,14 +98,50 @@ export default function Coach() {
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
-          <div className="text-4xl font-bold tabular-nums text-primary">
+          <div
+            className={
+              'text-4xl font-bold tabular-nums ' +
+              (c.over_budget ? 'text-rose-600 dark:text-rose-400' : 'text-primary')
+            }
+          >
             {won(c.daily_limit)}
+            {c.over_budget && (
+              <span className="ml-2 align-middle text-xs font-medium">
+                이번 달 예산 초과
+              </span>
+            )}
           </div>
           {c.today_action && (
             <p className="text-[15px] leading-relaxed text-foreground">
               {c.today_action}
             </p>
           )}
+
+          {/* 이번 달 예산 현황 */}
+          {typeof c.month_budget === 'number' && (
+            <div className="rounded-xl bg-muted/40 p-3">
+              <div className="mb-1.5 flex items-center justify-between text-xs">
+                <span className="text-muted-foreground">
+                  이번 달 쓴 돈 / 예산 (남은 {c.days_left}일)
+                </span>
+                <span className="tabular-nums">
+                  {won(c.month_spent)} / {won(c.month_budget)}
+                </span>
+              </div>
+              <div className="h-2 overflow-hidden rounded-full bg-muted">
+                <div
+                  className={
+                    'h-full rounded-full ' +
+                    (c.over_budget ? 'bg-rose-500' : 'bg-primary')
+                  }
+                  style={{
+                    width: `${Math.min(100, (c.month_spent / Math.max(1, c.month_budget)) * 100)}%`,
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
           <div className="text-xs text-muted-foreground">
             전재산 약 {won(c.total_asset)} · 적자는 주식 팔아 메우는 중
           </div>
