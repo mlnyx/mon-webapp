@@ -21,9 +21,10 @@ interface Coaching {
   date: string;
   weekday: string;
   daily_limit: number;
-  month_spent: number;
-  month_budget: number;
-  remaining: number;
+  daily_target: number;
+  today_spent: number;
+  since_spent: number;
+  budget_start: string;
   over_budget: boolean;
   days_left: number;
   total_asset: number;
@@ -117,15 +118,15 @@ export default function Coach() {
             </p>
           )}
 
-          {/* 이번 달 예산 현황 */}
-          {typeof c.month_budget === 'number' && (
+          {/* 오늘 한도 현황 */}
+          {typeof c.daily_target === 'number' && (
             <div className="rounded-xl bg-muted/40 p-3">
               <div className="mb-1.5 flex items-center justify-between text-xs">
                 <span className="text-muted-foreground">
-                  이번 달 쓴 돈 / 예산 (남은 {c.days_left}일)
+                  오늘 쓴 돈 / 하루 한도
                 </span>
                 <span className="tabular-nums">
-                  {won(c.month_spent)} / {won(c.month_budget)}
+                  {won(c.today_spent)} / {won(c.daily_target)}
                 </span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-muted">
@@ -135,7 +136,7 @@ export default function Coach() {
                     (c.over_budget ? 'bg-rose-500' : 'bg-primary')
                   }
                   style={{
-                    width: `${Math.min(100, (c.month_spent / Math.max(1, c.month_budget)) * 100)}%`,
+                    width: `${Math.min(100, (c.today_spent / Math.max(1, c.daily_target)) * 100)}%`,
                   }}
                 />
               </div>
@@ -143,7 +144,8 @@ export default function Coach() {
           )}
 
           <div className="text-xs text-muted-foreground">
-            전재산 약 {won(c.total_asset)} · 적자는 주식 팔아 메우는 중
+            {c.budget_start}부터 누적 {won(c.since_spent)} · 전재산 약{' '}
+            {won(c.total_asset)}
           </div>
         </CardContent>
       </Card>
