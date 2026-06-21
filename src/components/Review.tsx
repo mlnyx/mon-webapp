@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Check, RefreshCw } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Check, RefreshCw, Camera } from 'lucide-react';
 import type { Stats } from '@/lib/types';
 import { won, LABEL_CHOICES } from '@/lib/types';
 import { createClient } from '@/lib/supabase/client';
@@ -70,11 +70,70 @@ export default function Review({ stats }: { stats: Stats }) {
     setTimeout(() => setRefreshing(false), 2500);
   }
 
+  // ── 캡처 업로드 ──
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploads, setUploads] = useState<string[]>([]);
+  async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
+    for (const f of files) {
+      const dataUrl: string = await new Promise((res) => {
+        const r = new FileReader();
+        r.onload = () => res(r.result as string);
+        r.readAsDataURL(f);
+      });
+      await supabase.from('app_data').insert({
+        user_id: user.id,
+        key: 'capture:' + crypto.randomUUID(),
+        value: { image: dataUrl, name: f.name, at: new Date().toISOString() },
+      });
+      setUploads((u) => [...u, f.name]);
+    }
+    if (fileRef.current) fileRef.current.value = '';
+  }
+
   const review = stats.review ?? [];
   const done = review.filter((r) => labels[r.key]).length;
 
   return (
     <div className="flex flex-col gap-4">
+      {/* 캡처 업로드 */}
+      <Card className="rounded-2xl border border-border/60 bg-card">
+        <CardContent className="py-4">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-sm font-medium">📷 캡처 올리기</p>
+              <p className="text-xs text-muted-foreground">
+                은행·카드 거래내역 캡처를 올리면 자동으로 읽어 정리해요
+              </p>
+            </div>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={onPick}
+              className="hidden"
+            />
+            <Button onClick={() => fileRef.current?.click()} className="shrink-0">
+              <Camera size={15} />
+              올리기
+            </Button>
+          </div>
+          {uploads.length > 0 && (
+            <p className="mt-3 text-xs text-emerald-600 dark:text-emerald-400">
+              ✓ {uploads.length}장 업로드됨 — &ldquo;지금 갱신&rdquo;을 누르면
+              읽어서 반영돼요 (PC 켜져 있을 때)
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
       {/* 지금 갱신 */}
       <Card className="rounded-2xl border border-border/60 bg-card">
         <CardContent className="flex items-center justify-between gap-3 py-4">
