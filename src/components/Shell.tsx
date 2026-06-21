@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import type { LucideIcon } from 'lucide-react';
 import {
   LayoutDashboard,
@@ -12,6 +13,7 @@ import {
 import type { Stats, PlannerState } from '@/lib/types';
 import { Icon } from '@/components/ui/icon';
 import { cn } from '@/lib/utils';
+import { createClient } from '@/lib/supabase/client';
 import Report from '@/components/Report';
 import Planner from '@/components/Planner';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -36,6 +38,12 @@ export default function Shell({
   planner: PlannerState;
 }) {
   const [section, setSection] = useState<SectionKey>('summary');
+  const router = useRouter();
+
+  async function signOut() {
+    await createClient().auth.signOut();
+    router.replace('/login');
+  }
 
   return (
     <div className="min-h-dvh bg-background text-foreground">
@@ -46,14 +54,13 @@ export default function Shell({
             <span className="text-base font-semibold tracking-tight">나의 가계부</span>
             <div className="flex items-center gap-1">
               <ThemeToggle />
-              <form action="/auth/signout" method="post">
-                <button
-                  type="submit"
-                  className="rounded-full px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                >
-                  로그아웃
-                </button>
-              </form>
+              <button
+                type="button"
+                onClick={signOut}
+                className="rounded-full px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                로그아웃
+              </button>
             </div>
           </div>
 
