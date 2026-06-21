@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Check } from 'lucide-react';
+import { Check, RefreshCw } from 'lucide-react';
 import type { Stats } from '@/lib/types';
 import { won, LABEL_CHOICES } from '@/lib/types';
 import { createClient } from '@/lib/supabase/client';
@@ -12,6 +12,7 @@ import {
   CardDescription,
   CardContent,
 } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 // 애매한 거래를 사용자가 분류 → Supabase labels 에 저장(학습).
 // 다음 업데이트(업데이트.bat) 때 파이프라인이 내려받아 영구 반영.
@@ -52,11 +53,47 @@ export default function Review({ stats }: { stats: Stats }) {
     setTimeout(() => setSavedKey((k) => (k === key ? null : k)), 1500);
   }
 
+  const [refreshing, setRefreshing] = useState(false);
+  async function requestRefresh() {
+    setRefreshing(true);
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      await supabase.from('app_data').upsert({
+        user_id: user.id,
+        key: 'refresh',
+        value: { requested_at: new Date().toISOString() },
+      });
+    }
+    setTimeout(() => setRefreshing(false), 2500);
+  }
+
   const review = stats.review ?? [];
   const done = review.filter((r) => labels[r.key]).length;
 
   return (
     <div className="flex flex-col gap-4">
+      {/* 지금 갱신 */}
+      <Card className="rounded-2xl border border-border/60 bg-card">
+        <CardContent className="flex items-center justify-between gap-3 py-4">
+          <div className="min-w-0">
+            <p className="text-sm font-medium">지금 갱신</p>
+            <p className="text-xs text-muted-foreground">
+              수정한 분류·새 거래를 반영해요 (PC가 켜져 있을 때)
+            </p>
+          </div>
+          <Button onClick={requestRefresh} disabled={refreshing} className="shrink-0">
+            <RefreshCw
+              size={15}
+              className={refreshing ? 'animate-spin' : ''}
+            />
+            {refreshing ? '요청됨' : '갱신'}
+          </Button>
+        </CardContent>
+      </Card>
+
       <Card className="rounded-2xl border border-border/60 bg-card">
         <CardHeader>
           <CardTitle className="text-base">애매한 거래 수정</CardTitle>
