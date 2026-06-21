@@ -128,9 +128,15 @@ function Stat({
           ? 'text-primary'
           : 'text-foreground';
   return (
-    <div className="rounded-xl border border-border/60 bg-muted/40 p-3">
+    <div className="min-w-0 rounded-xl border border-border/60 bg-muted/40 p-3">
       <div className="text-xs text-muted-foreground">{label}</div>
-      <div className={cn('mt-1 font-bold tabular-nums', big ? 'text-2xl' : 'text-lg', color)}>
+      <div
+        className={cn(
+          'mt-1 truncate font-bold tabular-nums',
+          big ? 'text-xl sm:text-2xl' : 'text-base sm:text-lg',
+          color,
+        )}
+      >
         {value}
       </div>
     </div>
@@ -164,7 +170,7 @@ function Summary({ stats }: { stats: Stats }) {
           </div>
           <div className="rounded-xl bg-rose-500/10 p-4">
             <div className="text-xs text-rose-600/80 dark:text-rose-400/80">월 수지</div>
-            <div className="mt-1 text-3xl font-bold tabular-nums text-rose-600 dark:text-rose-400">
+            <div className="mt-1 truncate text-2xl font-bold tabular-nums text-rose-600 sm:text-3xl dark:text-rose-400">
               {signWon(t.net)}
             </div>
             <div className="mt-1 text-sm text-rose-600/90 dark:text-rose-400/90">
