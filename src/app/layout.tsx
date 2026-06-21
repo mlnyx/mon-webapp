@@ -1,9 +1,27 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import SWRegister from "@/components/SWRegister";
 
 export const metadata: Metadata = {
   title: "나의 가계부",
-  description: "개인 가계부 · 소비 통계 · 예산 플래너",
+  description: "개인 가계부 · 소비 통계 · 예산 코치",
+  manifest: "/mon-webapp/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "가계부",
+  },
+  icons: {
+    apple: "/mon-webapp/icons/apple-touch-icon.png",
+    icon: "/mon-webapp/icons/icon-192.png",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#13151a",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 // 초기 테마 적용(깜빡임 방지) — 저장값 없으면 다크 기본
@@ -17,7 +35,10 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="min-h-full bg-background text-foreground">{children}</body>
+      <body className="min-h-full bg-background text-foreground">
+        {children}
+        <SWRegister />
+      </body>
     </html>
   );
 }

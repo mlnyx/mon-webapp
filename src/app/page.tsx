@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { fetchStats, fetchPlanner, plannerDefault } from '@/lib/client-data';
 import type { Stats, PlannerState } from '@/lib/types';
 import Shell from '@/components/Shell';
+import { SkeletonList } from '@/components/ui/skeleton-card';
 
 export default function Home() {
   const router = useRouter();
@@ -45,8 +46,10 @@ export default function Home() {
 
   if (loading)
     return (
-      <div className="flex min-h-dvh items-center justify-center text-sm text-muted-foreground">
-        불러오는 중…
+      <div className="min-h-dvh bg-background">
+        <div className="mx-auto max-w-2xl px-4 pt-16 md:max-w-4xl xl:max-w-6xl">
+          <SkeletonList count={4} />
+        </div>
       </div>
     );
 

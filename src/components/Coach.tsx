@@ -11,6 +11,7 @@ import {
   CardDescription,
   CardContent,
 } from '@/components/ui/card';
+import { SkeletonList } from '@/components/ui/skeleton-card';
 
 interface Sched {
   date: string;
@@ -82,12 +83,7 @@ export default function Coach() {
     }
   }
 
-  if (loading)
-    return (
-      <p className="py-10 text-center text-sm text-muted-foreground">
-        오늘의 코칭 불러오는 중…
-      </p>
-    );
+  if (loading) return <SkeletonList count={3} />;
 
   if (!c)
     return (

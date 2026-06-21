@@ -112,6 +112,7 @@ export interface Plan {
 
 export interface Stats {
   window: [string, string];
+  generated_at?: string;
   total_spend: number;
   refund: number;
   net_spend: number;
@@ -182,6 +183,23 @@ export interface PlannerState {
   goal_emergency: number;
   goal_invest: number;
   target_month: string;
+}
+
+// ISO 시각 → "방금 전 / N분 전 / N시간 전 / N일 전" 상대시간 라벨.
+// 파싱 불가하거나 미래면 null (헤더에서 표시 안 함).
+export function relativeTime(iso?: string): string | null {
+  if (!iso) return null;
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return null;
+  const diffMs = Date.now() - t;
+  if (diffMs < 0) return null;
+  const min = Math.floor(diffMs / 60000);
+  if (min < 1) return '방금 전';
+  if (min < 60) return `${min}분 전`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}시간 전`;
+  const day = Math.floor(hr / 24);
+  return `${day}일 전`;
 }
 
 // 천단위 콤마
