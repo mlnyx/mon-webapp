@@ -9,6 +9,7 @@ import {
   Wallet,
   Activity,
   Calculator,
+  SlidersHorizontal,
 } from 'lucide-react';
 import type { Stats, PlannerState } from '@/lib/types';
 import { Icon } from '@/components/ui/icon';
@@ -16,11 +17,18 @@ import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 import Report from '@/components/Report';
 import Planner from '@/components/Planner';
+import Review from '@/components/Review';
 import ThemeToggle from '@/components/ThemeToggle';
 
-// 섹션 키 — Report 내부 분기('summary'|'spend'|'asset'|'habit') + 'planner'
-export type SectionKey = 'summary' | 'spend' | 'asset' | 'habit' | 'planner';
-type ReportSection = Exclude<SectionKey, 'planner'>;
+// 섹션 키 — Report 내부 분기 + planner + review
+export type SectionKey =
+  | 'summary'
+  | 'spend'
+  | 'asset'
+  | 'habit'
+  | 'planner'
+  | 'review';
+type ReportSection = 'summary' | 'spend' | 'asset' | 'habit';
 
 const NAV: { key: SectionKey; label: string; icon: LucideIcon }[] = [
   { key: 'summary', label: '요약', icon: LayoutDashboard },
@@ -28,6 +36,7 @@ const NAV: { key: SectionKey; label: string; icon: LucideIcon }[] = [
   { key: 'asset', label: '자산', icon: Wallet },
   { key: 'habit', label: '습관', icon: Activity },
   { key: 'planner', label: '플래너', icon: Calculator },
+  { key: 'review', label: '수정', icon: SlidersHorizontal },
 ];
 
 export default function Shell({
@@ -93,6 +102,8 @@ export default function Shell({
       <main className="mx-auto max-w-2xl px-4 py-5 md:max-w-4xl xl:max-w-6xl">
         {section === 'planner' ? (
           <Planner stats={stats} initial={planner} />
+        ) : section === 'review' ? (
+          <Review stats={stats} />
         ) : (
           <Report stats={stats} section={section as ReportSection} />
         )}

@@ -139,7 +139,38 @@ export interface Stats {
   debts: Debt[];
   debt_total: number;
   plan: Plan;
+  review: ReviewItem[];
 }
+
+// 수정 대기(애매한 거래) — 웹앱에서 사용자가 분류 고침
+export interface ReviewItem {
+  key: string; // 가맹점/상대 (라벨 키)
+  current: string; // 현재 분류
+  amount: number;
+  count: number;
+  date: string;
+  reason: string;
+}
+
+// 수정 화면 드롭다운 분류 선택지
+export const LABEL_CHOICES = [
+  '식비',
+  '데이트비용',
+  '카페·간식',
+  '생활·쇼핑',
+  '교통',
+  '미용',
+  '의료',
+  '문화·여가',
+  '경조사·선물',
+  '월세',
+  '주거·통신',
+  '저축·투자',
+  '차입·상환',
+  '수입',
+  '무시',
+  '기타',
+];
 
 // 플래너 사용자 입력(수정 시 DB 저장). 기본값은 stats.plan에서 시드.
 export interface PlannerState {
