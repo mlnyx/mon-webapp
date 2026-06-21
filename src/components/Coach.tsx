@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Sparkles, Target, CheckCircle2, Circle, Quote } from 'lucide-react';
+import { CalendarClock, CheckCircle2, Circle, Wallet } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { won } from '@/lib/types';
 import {
   Card,
   CardHeader,
@@ -11,13 +12,20 @@ import {
   CardContent,
 } from '@/components/ui/card';
 
+interface Sched {
+  date: string;
+  dday: string;
+  text: string;
+}
 interface Coaching {
   date: string;
   weekday: string;
-  today_comment: string;
-  month_plan: string[];
-  missions: string[];
-  one_number: string;
+  daily_limit: number;
+  total_asset: number;
+  schedule: Sched[];
+  today_action: string;
+  week_plan: string[];
+  one_line: string;
 }
 
 export default function Coach() {
@@ -36,10 +44,9 @@ export default function Coach() {
       const v = (data?.value as Coaching) ?? null;
       setC(v);
       setLoading(false);
-      // 미션 체크 상태(오늘 날짜 기준, localStorage)
       if (v) {
         try {
-          const raw = localStorage.getItem('missions_' + v.date);
+          const raw = localStorage.getItem('week_' + v.date);
           if (raw) setDone(JSON.parse(raw));
         } catch {
           // 무시
@@ -53,7 +60,7 @@ export default function Coach() {
     const next = { ...done, [i]: !done[i] };
     setDone(next);
     try {
-      localStorage.setItem('missions_' + c.date, JSON.stringify(next));
+      localStorage.setItem('week_' + c.date, JSON.stringify(next));
     } catch {
       // 무시
     }
@@ -70,51 +77,87 @@ export default function Coach() {
     return (
       <Card className="rounded-2xl border border-border/60 bg-card">
         <CardContent className="py-10 text-center text-sm text-muted-foreground">
-          아직 오늘의 코칭이 없어요.
-          <br />
-          PC에서 갱신(감시기/업데이트)하면 매일 코치가 한마디 남겨요.
+          아직 오늘의 코칭이 없어요. PC에서 갱신하면 생겨요.
         </CardContent>
       </Card>
     );
 
-  const doneCount = c.missions.filter((_, i) => done[i]).length;
-
   return (
     <div className="flex flex-col gap-4">
-      {/* 오늘의 한마디 */}
+      {/* 오늘 쓸 수 있는 돈 */}
       <Card className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 to-transparent">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Sparkles size={18} className="text-primary" />
-            오늘의 코치 · {c.date} ({c.weekday})
+          <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <Wallet size={16} className="text-primary" />
+            오늘 쓸 수 있는 돈 · {c.date} ({c.weekday})
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
-          <p className="text-[15px] leading-relaxed text-foreground">
-            {c.today_comment}
-          </p>
-          {c.one_number && (
-            <div className="flex items-center gap-2 rounded-xl bg-muted/50 px-3 py-2 text-sm">
-              <Quote size={14} className="shrink-0 text-muted-foreground" />
-              <span className="font-medium">{c.one_number}</span>
-            </div>
+          <div className="text-4xl font-bold tabular-nums text-primary">
+            {won(c.daily_limit)}
+          </div>
+          {c.today_action && (
+            <p className="text-[15px] leading-relaxed text-foreground">
+              {c.today_action}
+            </p>
           )}
+          <div className="text-xs text-muted-foreground">
+            전재산 약 {won(c.total_asset)} · 적자는 주식 팔아 메우는 중
+          </div>
         </CardContent>
       </Card>
 
-      {/* 오늘의 미션 (과제) */}
+      {/* 다가오는 일정 */}
       <Card className="rounded-2xl border border-border/60 bg-card">
         <CardHeader>
-          <CardTitle className="text-base">🎯 오늘의 미션</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <CalendarClock size={17} className="text-primary" />
+            다가오는 일정
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-2">
+          {c.schedule.map((s, i) => {
+            const urgent = s.dday === '오늘' || s.dday === '내일' || s.text.includes('보증금');
+            return (
+              <div
+                key={i}
+                className={
+                  'flex items-start gap-3 rounded-xl border p-3 ' +
+                  (urgent
+                    ? 'border-rose-500/40 bg-rose-500/10'
+                    : 'border-border/50 bg-muted/30')
+                }
+              >
+                <div className="flex shrink-0 flex-col items-center">
+                  <span className="text-sm font-bold">{s.date}</span>
+                  <span
+                    className={
+                      'text-[11px] ' +
+                      (urgent
+                        ? 'text-rose-600 dark:text-rose-400'
+                        : 'text-muted-foreground')
+                    }
+                  >
+                    {s.dday}
+                  </span>
+                </div>
+                <span className="text-sm leading-snug">{s.text}</span>
+              </div>
+            );
+          })}
+        </CardContent>
+      </Card>
+
+      {/* 이번 주 할 일 (체크) */}
+      <Card className="rounded-2xl border border-border/60 bg-card">
+        <CardHeader>
+          <CardTitle className="text-base">이번 주 이렇게</CardTitle>
           <CardDescription>
-            {doneCount}/{c.missions.length} 완료
-            {doneCount === c.missions.length && c.missions.length > 0
-              ? ' — 오늘 완벽! 👏'
-              : ''}
+            {c.week_plan.filter((_, i) => done[i]).length}/{c.week_plan.length} 완료
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
-          {c.missions.map((m, i) => (
+          {c.week_plan.map((p, i) => (
             <button
               key={i}
               onClick={() => toggle(i)}
@@ -135,37 +178,18 @@ export default function Coach() {
                     : 'text-sm text-foreground'
                 }
               >
-                {m}
+                {p}
               </span>
             </button>
           ))}
         </CardContent>
       </Card>
 
-      {/* 이번 달 가이드 */}
-      <Card className="rounded-2xl border border-border/60 bg-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Target size={17} className="text-primary" />
-            이번 달 이렇게 살자
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-2">
-          {c.month_plan.map((p, i) => (
-            <div
-              key={i}
-              className="flex items-start gap-2 rounded-xl bg-muted/30 p-3 text-sm"
-            >
-              <span className="mt-0.5 font-bold text-primary">{i + 1}</span>
-              <span>{p}</span>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-
-      <p className="px-1 text-center text-xs text-muted-foreground">
-        코치는 하루 한 번 새로워져요. (PC 갱신 시)
-      </p>
+      {c.one_line && (
+        <div className="rounded-xl bg-muted/40 px-4 py-3 text-center text-sm font-medium">
+          {c.one_line}
+        </div>
+      )}
     </div>
   );
 }
