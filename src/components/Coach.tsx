@@ -17,16 +17,26 @@ interface Sched {
   dday: string;
   text: string;
 }
+interface AccTarget {
+  name: string;
+  now: number;
+  target: string;
+  tone: string;
+}
 interface Coaching {
   date: string;
   weekday: string;
   daily_limit: number;
   daily_target: number;
+  spendable: number;
+  days_to_income: number;
+  next_income_date: string;
+  next_income_amt: number;
+  account_targets: AccTarget[];
   today_spent: number;
   since_spent: number;
   budget_start: string;
   over_budget: boolean;
-  days_left: number;
   total_asset: number;
   schedule: Sched[];
   today_action: string;
@@ -99,18 +109,8 @@ export default function Coach() {
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
-          <div
-            className={
-              'text-4xl font-bold tabular-nums ' +
-              (c.over_budget ? 'text-rose-600 dark:text-rose-400' : 'text-primary')
-            }
-          >
-            {won(c.daily_limit)}
-            {c.over_budget && (
-              <span className="ml-2 align-middle text-xs font-medium">
-                이번 달 예산 초과
-              </span>
-            )}
+          <div className="text-4xl font-bold tabular-nums text-primary">
+            {won(c.daily_target)}
           </div>
           {c.today_action && (
             <p className="text-[15px] leading-relaxed text-foreground">
@@ -119,36 +119,67 @@ export default function Coach() {
           )}
 
           {/* 오늘 한도 현황 */}
-          {typeof c.daily_target === 'number' && (
-            <div className="rounded-xl bg-muted/40 p-3">
-              <div className="mb-1.5 flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">
-                  오늘 쓴 돈 / 하루 한도
-                </span>
-                <span className="tabular-nums">
-                  {won(c.today_spent)} / {won(c.daily_target)}
-                </span>
-              </div>
-              <div className="h-2 overflow-hidden rounded-full bg-muted">
-                <div
-                  className={
-                    'h-full rounded-full ' +
-                    (c.over_budget ? 'bg-rose-500' : 'bg-primary')
-                  }
-                  style={{
-                    width: `${Math.min(100, (c.today_spent / Math.max(1, c.daily_target)) * 100)}%`,
-                  }}
-                />
-              </div>
+          <div className="rounded-xl bg-muted/40 p-3">
+            <div className="mb-1.5 flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">오늘 쓴 돈 / 오늘 적당</span>
+              <span className="tabular-nums">
+                {won(c.today_spent)} / {won(c.daily_target)}
+              </span>
             </div>
-          )}
+            <div className="h-2 overflow-hidden rounded-full bg-muted">
+              <div
+                className={
+                  'h-full rounded-full ' +
+                  (c.today_spent > c.daily_target ? 'bg-rose-500' : 'bg-primary')
+                }
+                style={{
+                  width: `${Math.min(100, (c.today_spent / Math.max(1, c.daily_target)) * 100)}%`,
+                }}
+              />
+            </div>
+          </div>
 
           <div className="text-xs text-muted-foreground">
-            {c.budget_start}부터 누적 {won(c.since_spent)} · 전재산 약{' '}
-            {won(c.total_asset)}
+            쓸 수 있는 현금 {won(c.spendable)} · 다음 월급{' '}
+            {c.next_income_date} ({c.days_to_income}일 후) → 그때까지 나눠 씀
           </div>
         </CardContent>
       </Card>
+
+      {/* 통장별 목표 */}
+      {c.account_targets && c.account_targets.length > 0 && (
+        <Card className="rounded-2xl border border-border/60 bg-card">
+          <CardHeader>
+            <CardTitle className="text-base">통장별 목표</CardTitle>
+            <CardDescription>각 통장에 얼마가 있어야 하나</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-2">
+            {c.account_targets.map((a, i) => (
+              <div
+                key={i}
+                className="flex items-start justify-between gap-3 rounded-xl border border-border/50 bg-muted/30 p-3"
+              >
+                <div className="min-w-0">
+                  <div className="text-sm font-medium">{a.name}</div>
+                  <div className="text-xs text-muted-foreground">{a.target}</div>
+                </div>
+                <div
+                  className={
+                    'shrink-0 text-sm font-semibold tabular-nums ' +
+                    (a.tone === 'warn'
+                      ? 'text-rose-600 dark:text-rose-400'
+                      : a.tone === 'ok'
+                        ? 'text-emerald-600 dark:text-emerald-400'
+                        : 'text-foreground')
+                  }
+                >
+                  {won(a.now)}
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
       {/* 다가오는 일정 */}
       <Card className="rounded-2xl border border-border/60 bg-card">
