@@ -226,7 +226,8 @@ const CAT_LABEL: Record<string, string> = {
 };
 
 // 가맹점이 아니라 "무엇에 썼는지" 라벨. cat/sub 우선.
+// 세부분류가 있으면 매핑명(없으면 세부명 그대로), 없으면 카테고리명.
 export function typeLabel(cat: string, sub?: string): string {
-  if (sub && sub !== '전체' && SUB_LABEL[sub]) return SUB_LABEL[sub];
+  if (sub && sub !== '전체') return SUB_LABEL[sub] ?? sub;
   return CAT_LABEL[cat] ?? cat;
 }
