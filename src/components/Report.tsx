@@ -353,6 +353,36 @@ function DrillCat({
   );
 }
 
+// 긴 세부분류명 짧게
+const SHORT_SUB: Record<string, string> = {
+  '화장품·뷰티': '화장품',
+  '의류·패션': '옷',
+  '악기·취미': '취미',
+  '디지털·구독': '구독',
+  '오락·레저': '오락',
+  '식사(데이트)': '식사',
+  '카페(데이트)': '카페',
+};
+
+// 카테고리 안에 뭐가 있는지 미리보기 텍스트 (예: 온라인쇼핑·백화점·화장품·옷)
+function catPreview(stats: Stats, cat: string): string {
+  const subs = Object.entries(stats.subcats[cat] ?? {}).filter(
+    ([k]) => k !== '전체',
+  );
+  if (subs.length) {
+    return subs
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 4)
+      .map(([k]) => SHORT_SUB[k] ?? k)
+      .join('·');
+  }
+  const items = stats.hierarchy[cat]?.['전체']?.items ?? [];
+  return items
+    .slice(0, 3)
+    .map((i) => i.name)
+    .join('·');
+}
+
 function Spend({ stats }: { stats: Stats }) {
   const maxCat = Math.max(...stats.categories.map((c) => c.amount), 1);
   const grand = stats.categories.reduce((a, c) => a + c.amount, 0);
@@ -372,6 +402,7 @@ function Spend({ stats }: { stats: Stats }) {
             <Bar
               key={c.name}
               label={c.name}
+              sub={catPreview(stats, c.name)}
               width={(c.amount / maxCat) * 100}
               amount={`${won(c.amount)} · ${((c.amount / grand) * 100).toFixed(1)}%`}
             />
